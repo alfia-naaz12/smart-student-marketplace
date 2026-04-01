@@ -72,6 +72,52 @@
                 <h5 class="fw-bold mb-2">Description</h5>
                 <p class="text-muted">{{ listing.description }}</p>
             </div>
+            {% if user.is_authenticated and user != listing.seller %}
+
+<div class="mt-4 p-4 rounded shadow-sm bg-white">
+
+    <h5 class="fw-bold mb-3">💬 Contact Seller</h5>
+
+    <!-- 👤 Seller Info -->
+    <p class="text-muted mb-2">
+        Seller: <strong>{{ listing.seller.username }}</strong>
+    </p>
+
+    <form method="POST" action="{% url 'send_message' listing.id %}">
+        {% csrf_token %}
+
+        <!-- 🔥 IMPORTANT (hidden fields for chat system) -->
+        <input type="hidden" name="receiver_id" value="{{ listing.seller.id }}">
+        <input type="hidden" name="listing_id" value="{{ listing.id }}">
+
+        <!-- 💬 Message box -->
+        <textarea 
+            name="message" 
+            class="form-control mb-3" 
+            rows="3"
+            placeholder="Ask about this item..."
+            required>
+        </textarea>
+
+        <!-- 🚀 Buttons -->
+        <div class="d-flex gap-2">
+
+            <button type="submit" class="btn btn-primary w-100">
+                Send Message
+            </button>
+
+            <!-- 📩 Go to inbox -->
+            <a href="{% url 'inbox' %}" class="btn btn-outline-dark w-100">
+                View Chat
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endif %}
 
         </div>
 

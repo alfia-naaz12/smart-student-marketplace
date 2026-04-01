@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+<div class="row shadow rounded overflow-hidden" style="height:550px;">
+
+    <!-- 🔥 LEFT SIDE (CONVERSATIONS) -->
+    <div class="col-md-4 border-end bg-white" style="overflow-y:auto;">
+        <div class="p-3 border-bottom">
+            <h5 class="mb-0">💬 Chats</h5>
+        </div>
+
+        {% for u in users %}
+            <a href="?user={{ u.id }}" 
+               class="d-block p-3 border-bottom text-decoration-none chat-user">
+
+                👤 <strong>{{ u.username }}</strong>
+            </a>
+        {% empty %}
+            <p class="p-3 text-muted">No conversations yet</p>
+        {% endfor %}
+    </div>
+
+
+    <!-- 🔥 RIGHT SIDE (CHAT WINDOW) -->
+    <div class="col-md-8 d-flex flex-column bg-light">
+
+        {% if selected_user %}
+
+            <!-- 🔥 HEADER -->
+            <div class="p-3 border-bottom bg-white">
+                <strong>Chat with {{ selected_user.username }}</strong>
+            </div>
+
+            <!-- 🔥 MESSAGES -->
+            <div id="chat-box" class="flex-grow-1 p-3" style="overflow-y:auto;">
+
+                {% for msg in chat_messages %}
+
+                    {% if msg.sender == user %}
+                        <!-- SENT -->
+                        <div class="text-end mb-2">
+                            <div class="chat-bubble sent">
+                                {{ msg.content }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- RECEIVED -->
+                        <div class="text-start mb-2">
+                            <div class="chat-bubble received">
+                                {{ msg.content }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% empty %}
+                    <p class="text-muted text-center mt-4">
+                        No messages yet. Start the conversation 👋
+                    </p>
+                {% endfor %}
+
+            </div>
+
+            <!-- 🔥 INPUT BOX -->
+            <form method="POST" class="p-3 border-top bg-white d-flex">
+                {% csrf_token %}
+
+                <!-- REQUIRED -->
+                <input type="hidden" name="receiver_id" value="{{ selected_user.id }}">
+                <input type="hidden" name="listing_id" value="{{ selected_listing_id }}">
+
+                <input type="text" name="message"
+                       class="form-control me-2"
+                       placeholder="Type a message..."
+                       required>
+
+                <button class="btn btn-primary">Send</button>
+            </form>
+
+        {% else %}
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <p class="text-muted">Select a chat to start messaging</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+</div>
+
+
+<!-- 🎨 STYLES -->
+<style>
+
+.chat-user:hover {
+    background: #f1f1f1;
+}
+
+/* 💬 BUBBLES */
+.chat-bubble {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    font-size: 14px;
+}
+
+.sent {
+    background: #0d6efd;
+    color: white;
+}
+
+.received {
+    background: #e4e6eb;
+}
+
+/* 🔥 SCROLL FIX */
+#chat-box {
+    scroll-behavior: smooth;
+}
+
+</style>
+
+
+<!-- 🚀 AUTO SCROLL TO BOTTOM -->
+<script>
+const chatBox = document.getElementById("chat-box");
+if (chatBox) {
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+{% endblock %}

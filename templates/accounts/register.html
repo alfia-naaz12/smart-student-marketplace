@@ -9,6 +9,13 @@
         <h2 class="text-center mb-3 fw-bold">Create Account</h2>
         <p class="text-center text-muted mb-4">Join the marketplace</p>
 
+        <!-- 🔥 SHOW ERRORS -->
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                {{ form.errors }}
+            </div>
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
 
@@ -27,7 +34,9 @@
                 {{ form.password2 }}
             </div>
 
-            <button class="btn btn-primary w-100 mt-2">Register</button>
+            <button type="submit" class="btn btn-primary w-100 mt-2">
+                Register
+            </button>
         </form>
 
         <p class="text-center mt-3">

@@ -8,6 +8,15 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    listing = models.ForeignKey('Listing', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} → {self.receiver}"
 
 class Listing(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -16,7 +25,7 @@ class Listing(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    # category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
     image = models.ImageField(upload_to='listings/', null=True, blank=True)
 
