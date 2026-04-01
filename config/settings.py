@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-tc2(&z8+03qs+*rurj-_9m8$=am)c4q)!h5n=@^7i2f9++tc7x
 SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 

@@ -3,86 +3,222 @@
 {% block content %}
 
 <div class="container mt-5">
-    <div class="card p-4 shadow">
 
-        <!-- 🔹 TITLE -->
-        <h2 class="fw-bold">{{ listing.title }}</h2>
+    <div class="row g-5">
 
-        <!-- 🔹 PRICE -->
-        <h4 class="text-primary">€{{ listing.price }}</h4>
+        <!-- 📸 IMAGE -->
+        <div class="col-md-6">
 
-        <!-- ❤️ LIKE BUTTON -->
-        {% if user.is_authenticated %}
-            {% if is_favorited %}
-                <a href="{% url 'toggle_favorite' listing.id %}" class="btn btn-danger mt-2">
-                    ❤️ Unlike
-                </a>
-            {% else %}
-                <a href="{% url 'toggle_favorite' listing.id %}" class="btn btn-outline-danger mt-2">
-                    ❤️ Like
-                </a>
-            {% endif %}
-        {% endif %}
+            <div class="image-box shadow-sm">
 
-        <!-- ❤️ LIKE COUNT -->
-        <p class="mt-2">❤️ {{ listing.favorite_set.count }} likes</p>
-
-        <!-- 🔹 IMAGE + DESCRIPTION -->
-        <div class="row mt-4 align-items-center">
-
-            <div class="col-md-6 text-center">
                 {% if listing.image %}
-                    <img src="{{ listing.image.url }}" 
-                         style="width:100%; max-width:450px; height:300px; object-fit:cover; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                    <img src="{{ listing.image.url }}" class="main-img">
+                {% else %}
+                    <img src="https://via.placeholder.com/500" class="main-img">
                 {% endif %}
-            </div>
 
-            <div class="col-md-6">
-                <p class="mt-3">{{ listing.description }}</p>
-                <p class="text-muted">Posted by: {{ listing.seller.username }}</p>
-
-                {% if user == listing.seller %}
-                    <div class="mt-3">
-                        <a href="{% url 'edit_listing' listing.id %}" class="btn btn-warning me-2">Edit</a>
-                        <a href="{% url 'delete_listing' listing.id %}" class="btn btn-danger">Delete</a>
-                    </div>
-                {% endif %}
             </div>
 
         </div>
 
-        <!-- 🔹 REVIEWS -->
-        <hr>
-        <h5 class="mb-3">Seller Reviews</h5>
+        <!-- 📦 DETAILS -->
+        <div class="col-md-6">
 
-        {% if avg_rating %}
-            <p><strong>Average Rating:</strong> ⭐ {{ avg_rating|floatformat:1 }}/5</p>
-        {% else %}
-            <p class="text-muted">No ratings yet</p>
-        {% endif %}
+            <h2 class="fw-bold">{{ listing.title }}</h2>
 
-        {% for review in listing.seller.reviews.all %}
-            <div class="card p-3 mb-2 shadow-sm">
+            <h3 class="text-primary fw-bold mb-3">€{{ listing.price }}</h3>
 
-                <div class="d-flex justify-content-between">
-                    <strong>{{ review.reviewer.username }}</strong>
-                    <span>⭐ {{ review.rating }}/5</span>
+            <p class="text-muted">
+                Posted by <strong>{{ listing.seller.username }}</strong>
+            </p>
+
+            <!-- ❤️ LIKE BUTTON -->
+            {% if user.is_authenticated %}
+                <div class="mb-3">
+
+                    {% if is_favorited %}
+                        <a href="{% url 'toggle_favorite' listing.id %}" 
+                           class="btn btn-danger">
+                            ❤️ Saved
+                        </a>
+                    {% else %}
+                        <a href="{% url 'toggle_favorite' listing.id %}" 
+                           class="btn btn-outline-danger">
+                            🤍 Save
+                        </a>
+                    {% endif %}
+
+                    <span class="ms-3 text-muted">
+                        {{ listing.favorite_set.count }} likes
+                    </span>
+
                 </div>
+            {% endif %}
 
-                <p class="text-muted mb-0">{{ review.comment }}</p>
+            <!-- ✏️ ACTIONS -->
+            {% if user == listing.seller %}
+                <div class="mb-3">
+                    <a href="{% url 'edit_listing' listing.id %}" class="btn btn-warning me-2">
+                        Edit
+                    </a>
+                    <a href="{% url 'delete_listing' listing.id %}" class="btn btn-danger">
+                        Delete
+                    </a>
+                </div>
+            {% endif %}
 
+            <!-- DESCRIPTION -->
+            <div class="description-box mt-4">
+                <h5 class="fw-bold mb-2">Description</h5>
+                <p class="text-muted">{{ listing.description }}</p>
             </div>
-        {% empty %}
-            <p class="text-muted">No reviews yet</p>
-        {% endfor %}
 
-        {% if user.is_authenticated and user != listing.seller %}
-            <a href="{% url 'add_review' listing.seller.id %}" class="btn btn-outline-primary mt-2">
-                Leave Review
-            </a>
-        {% endif %}
+        </div>
 
     </div>
+
+    <!-- ⭐ REVIEWS -->
+<!-- ⭐ REVIEWS -->
+<div class="mt-5">
+
+    <h4 class="fw-bold mb-3">Customer Reviews</h4>
+
+    <!-- ⭐ AVG RATING -->
+    {% if avg_rating %}
+        <div class="mb-3">
+            <span class="rating-badge">
+                ⭐ {{ avg_rating|floatformat:1 }}
+            </span>
+            <span class="text-muted ms-2">
+                ({{ reviews|length }} reviews)
+            </span>
+        </div>
+    {% else %}
+        <p class="text-muted">No reviews yet</p>
+    {% endif %}
+
+    <!-- ⭐ REVIEW LIST -->
+    {% for review in reviews %}
+        <div class="review-card mb-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <strong>{{ review.reviewer.username }}</strong>
+
+                <!-- ⭐ STARS -->
+                <div class="stars">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            ⭐
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <p class="text-muted mt-2 mb-0">
+                {{ review.comment }}
+            </p>
+
+        </div>
+    {% empty %}
+        <p class="text-muted">No reviews yet</p>
+    {% endfor %}
+
+    <!-- ✍️ ADD REVIEW -->
+    {% if user.is_authenticated and user != listing.seller %}
+
+        <div class="add-review-box mt-4">
+
+            <h6 class="fw-bold mb-3">Write a Review</h6>
+
+            <form method="POST" action="{% url 'add_review' listing.id %}">
+                {% csrf_token %}
+
+                <div class="mb-2">
+                    <select name="rating" class="form-control">
+                        <option value="5">5 ⭐ Excellent</option>
+                        <option value="4">4 ⭐ Good</option>
+                        <option value="3">3 ⭐ Average</option>
+                        <option value="2">2 ⭐ Poor</option>
+                        <option value="1">1 ⭐ Bad</option>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <textarea name="comment" class="form-control"
+                              placeholder="Share your experience..."
+                              rows="3"></textarea>
+                </div>
+
+                <button class="btn btn-dark">Submit Review</button>
+            </form>
+
+        </div>
+
+    {% endif %}
+
 </div>
+
+</div>
+
+<!-- 🎨 STYLES -->
+<style>
+
+.image-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.main-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.description-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.review-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.rating-badge {
+    background: #ffc107;
+    color: #000;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.review-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stars {
+    font-size: 14px;
+    color: #ffc107;
+}
+
+.add-review-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+</style>
 
 {% endblock %}

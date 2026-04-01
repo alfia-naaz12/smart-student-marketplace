@@ -2,6 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Listing(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -9,7 +16,11 @@ class Listing(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    image = models.FileField(upload_to='listings/', null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+
+    image = models.ImageField(upload_to='listings/', null=True, blank=True)
+
+    location = models.CharField(max_length=100, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -19,7 +30,7 @@ class Listing(models.Model):
 
 class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE)
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
 
     rating = models.IntegerField()
     comment = models.TextField(blank=True)
@@ -27,13 +38,16 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.seller.username} - {self.rating}"
-    
+        return f"{self.reviewer.username} - {self.rating}"
+
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'listing')  # prevents duplicates
 
     def __str__(self):
         return f"{self.user.username} likes {self.listing.title}"
