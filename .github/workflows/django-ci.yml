@@ -1,11 +1,11 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,14 +27,24 @@ jobs:
         run: |
           python manage.py check
 
-      - name: Run Migrations
-        run: |
-          python manage.py migrate
-
-      - name: Run Bandit (SAFE)
+      - name: Run Bandit
         run: |
           python -m bandit -r . || true
 
-      - name: Run pip-audit (SAFE)
+      - name: Run pip-audit
         run: |
           python -m pip_audit || true
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/smart-student-marketplace
+            ./deploy.sh
+          EOF
